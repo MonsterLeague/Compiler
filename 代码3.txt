@@ -1,0 +1,9 @@
+program test;
+begin
+	for i:=100 downto 15 do
+	if x<y+(15-9) then y:=x
+	else x:=y;
+	end
+	begin
+	end
+end.

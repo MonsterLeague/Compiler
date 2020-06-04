@@ -1,0 +1,12 @@
+# some java file
+Player.java
+
+# IntelliJ project files
+.idea
+*.mf
+*.iml
+out
+gen
+Test.java
+classes
+target

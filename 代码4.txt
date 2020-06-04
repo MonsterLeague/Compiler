@@ -1,0 +1,6 @@
+program test;
+begin
+	if (1+2)*3+1/2>0 then
+		if 2<3 then y:=1
+		else z:=1
+end.
