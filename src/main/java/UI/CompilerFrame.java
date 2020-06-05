@@ -12,15 +12,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 
-public class ParserFrame extends JFrame implements ActionListener {
+public class CompilerFrame extends JFrame implements ActionListener {
 
-    public ParserFrame() {
+    public CompilerFrame() {
         // 设置标题
         setTitle("Parser");
         // 设置窗口大小
         setSize(1200,700);
         //设置窗口图标
-        setIconImage(Toolkit.getDefaultToolkit().getImage(ParserFrame.class.getResource("/icon.jpg")));
+        setIconImage(Toolkit.getDefaultToolkit().getImage(CompilerFrame.class.getResource("/icon.jpg")));
         //初始化组件
         initComponents();
         //初始化布局
@@ -47,14 +47,18 @@ public class ParserFrame extends JFrame implements ActionListener {
         menubarExecute = new JMenu("运行");
         menubarExecuteLexing = new JMenuItem("词法分析");
         menubarExecuteParsing = new JMenuItem("语法分析");
+        menubarExecuteSemantic = new JMenuItem("语义分析");
         menubarExecuteClear = new JMenuItem("清空结果");
         menubarExecuteLexing.addActionListener(this);
         menubarExecuteParsing.addActionListener(this);
+        menubarExecuteSemantic.addActionListener(this);
         menubarExecuteClear.addActionListener(this);
 
         menubarView = new JMenu("视图");
         menubarViewParsingResult = new JMenuItem("语法分析结果");
         menubarViewParsingResult.addActionListener(this);
+        menubarViewExpandedStack = new JMenuItem("语义分析拓展栈");
+        menubarViewExpandedStack.addActionListener(this);
 
         menubarHelp = new JMenu("帮助");
         menubarHelpAbout = new JMenuItem("关于我们");
@@ -66,12 +70,16 @@ public class ParserFrame extends JFrame implements ActionListener {
         editCodeScrollPane = new JScrollPane(editCodeArea);
 
         errorLabel = new JLabel("错误日志");
-        errorIcon = new JLabel(new ImageIcon(ParserFrame.class.getResource("/warning.png")));
+        errorIcon = new JLabel(new ImageIcon(CompilerFrame.class.getResource("/warning.png")));
 
         resultTabbedPane = new ResultTabbedPane();
         errorTabbedPane = new ErrorTabbedPane();
 
         analyseList = new AnalyseList();
+
+        int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+        int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+        expandedStackPanel = new ExpandedStackPanel(width, height - 90);
     }
 
     public void initLayout() {
@@ -88,6 +96,7 @@ public class ParserFrame extends JFrame implements ActionListener {
         menubarExecute.add(menubarExecuteParsing);
         menubarExecute.add(menubarExecuteClear);
         menubarView.add(menubarViewParsingResult);
+        menubarView.add(menubarViewExpandedStack);
         menubarHelp.add(menubarHelpAbout);
         setJMenuBar(menubar);
         mainPanel.add(editCodeScrollPane);
@@ -125,8 +134,10 @@ public class ParserFrame extends JFrame implements ActionListener {
         menubarFileExit.setForeground(Color.WHITE);
         menubarExecuteLexing.setForeground(Color.WHITE);
         menubarExecuteParsing.setForeground(Color.WHITE);
+        menubarExecuteSemantic.setForeground(Color.WHITE);
         menubarExecuteClear.setForeground(Color.WHITE);
         menubarViewParsingResult.setForeground(Color.WHITE);
+        menubarViewExpandedStack.setForeground(Color.WHITE);
         menubarHelpAbout.setForeground(Color.WHITE);
 
         menubarFileOpen.setBackground(new Color(60, 63, 65));
@@ -136,8 +147,10 @@ public class ParserFrame extends JFrame implements ActionListener {
         menubarFileExit.setBackground(new Color(60, 63, 65));
         menubarExecuteLexing.setBackground(new Color(60, 63, 65));
         menubarExecuteParsing.setBackground(new Color(60, 63, 65));
+        menubarExecuteSemantic.setBackground(new Color(60, 63, 65));
         menubarExecuteClear.setBackground(new Color(60, 63, 65));
         menubarViewParsingResult.setBackground(new Color(60, 63, 65));
+        menubarViewExpandedStack.setBackground(new Color(60, 63, 65));
         menubarHelpAbout.setBackground(new Color(60, 63, 65));
 
         menubarFile.setFont(new Font("微软雅黑", Font.PLAIN, 15));
@@ -151,8 +164,10 @@ public class ParserFrame extends JFrame implements ActionListener {
         menubarFileExit.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         menubarExecuteLexing.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         menubarExecuteParsing.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        menubarExecuteSemantic.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         menubarExecuteClear.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         menubarViewParsingResult.setFont(new Font("微软雅黑", Font.PLAIN, 15));
+        menubarViewExpandedStack.setFont(new Font("微软雅黑", Font.PLAIN, 15));
         menubarHelpAbout.setFont(new Font("微软雅黑", Font.PLAIN, 15));
 
         mainPanel.setBackground(new Color(60, 63, 65));
@@ -198,9 +213,33 @@ public class ParserFrame extends JFrame implements ActionListener {
                     JOptionPane.showMessageDialog(mainPanel, "词法分析阶段出现错误！", "提示", JOptionPane.ERROR_MESSAGE);
                 }
                 else {
-                    TextParse textParse = new TextParse(analyseList, lex.get_Lex_Result(), errorTabbedPane.getParsingErrorDTM(),
-                            resultTabbedPane.getParsingDTM());
+                    TextParse textParse = new TextParse(analyseList, lex.get_Lex_Result(), lex.get_Lex_Table(),
+                            errorTabbedPane.getParsingErrorDTM(), resultTabbedPane.getParsingDTM(),
+                            expandedStackPanel.expandedStackDTM, resultTabbedPane.getSemanticDTM());
                     textParse.Parsing();
+                }
+            }
+        }
+        //当运行语义分析
+        else if (e.getSource() == menubarExecuteSemantic) {
+            clearTableData();
+            if(editCodeArea.getText().equals("")){
+                JOptionPane.showMessageDialog(mainPanel, "未输入代码！", "提示", JOptionPane.WARNING_MESSAGE);
+            }
+            else {
+                // 词法分析
+                TextLex lex = new TextLex(editCodeArea.getText(), resultTabbedPane.getLexingResultDTM(),
+                        errorTabbedPane.getLexingErrorDTM(), resultTabbedPane.getSymbolDTM());
+                lex.scannerAll();
+                // 语法分析
+                if (lex.get_Lex_Error().size() != 0) {
+                    JOptionPane.showMessageDialog(mainPanel, "词法分析阶段出现错误！", "提示", JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                    TextParse parse = new TextParse(analyseList, lex.get_Lex_Result(), lex.get_Lex_Table(),
+                            errorTabbedPane.getParsingErrorDTM(), resultTabbedPane.getParsingDTM(),
+                            expandedStackPanel.expandedStackDTM, resultTabbedPane.getSemanticDTM());
+                    parse.Parsing();
                 }
             }
         }
@@ -250,12 +289,27 @@ public class ParserFrame extends JFrame implements ActionListener {
             int height = Toolkit.getDefaultToolkit().getScreenSize().height;
             jf.setSize(width, height);
             //设置窗口图标
-            jf.setIconImage(Toolkit.getDefaultToolkit().getImage(ParserFrame.class.getResource("enlarge.png")));
+            jf.setIconImage(Toolkit.getDefaultToolkit().getImage(CompilerFrame.class.getResource("/enlarge.png")));
             jf.setContentPane(new ParsingResultPanel(width, height - 90, resultTabbedPane.getParsingDTM()));
             jf.setLocation(0, 0);
             jf.setVisible(true);
         }
-        //但点击关于我们
+        //当点击语义分析拓展栈视图
+        else if (e.getSource() == menubarViewExpandedStack) {
+            JFrame jf = new JFrame();
+            // 设置标题
+            jf.setTitle("语义分析拓展栈视图");
+            // 设置窗口大小
+            int width = Toolkit.getDefaultToolkit().getScreenSize().width;
+            int height = Toolkit.getDefaultToolkit().getScreenSize().height;
+            jf.setSize(width, height);
+            //设置窗口图标
+            jf.setIconImage(Toolkit.getDefaultToolkit().getImage(CompilerFrame.class.getResource("/enlarge.png")));
+            jf.setContentPane(expandedStackPanel);
+            jf.setLocation(0, 0);
+            jf.setVisible(true);
+        }
+        //当点击关于我们
         else if (e.getSource() == menubarHelpAbout) {
             JOptionPane.showMessageDialog(mainPanel, "语法分析器\n031702645吴宜航\n031702646鲍子涵", "关于我们", JOptionPane.INFORMATION_MESSAGE);
         }
@@ -264,6 +318,7 @@ public class ParserFrame extends JFrame implements ActionListener {
     public void clearTableData() {
         resultTabbedPane.clear();
         errorTabbedPane.clear();
+        expandedStackPanel.clear();
     }
 
     @Override
@@ -314,8 +369,10 @@ public class ParserFrame extends JFrame implements ActionListener {
     private JMenuItem menubarFileExit;
     private JMenuItem menubarExecuteLexing;
     private JMenuItem menubarExecuteParsing;
+    private JMenuItem menubarExecuteSemantic;
     private JMenuItem menubarExecuteClear;
     private JMenuItem menubarViewParsingResult;
+    private JMenuItem menubarViewExpandedStack;
     private JMenuItem menubarHelpAbout;
     private JTextArea editCodeArea;
     private JScrollPane editCodeScrollPane;
@@ -324,4 +381,5 @@ public class ParserFrame extends JFrame implements ActionListener {
     private ResultTabbedPane resultTabbedPane;
     private ErrorTabbedPane errorTabbedPane;
     private AnalyseList analyseList;
+    private ExpandedStackPanel expandedStackPanel;
 }

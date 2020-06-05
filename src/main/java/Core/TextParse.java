@@ -20,16 +20,19 @@ public class TextParse{
     Semantic semantic;
     int row_number = 1;
 
-    public TextParse(AnalyseList analyseList, ArrayList<String> input_cache, DefaultTableModel tbmodel_parse_error,
-                     DefaultTableModel tbmodel_parse_result){
+    public TextParse(AnalyseList analyseList, ArrayList<String> input_cache, ArrayList<String> table_cache,
+                     DefaultTableModel tbmodel_parse_error, DefaultTableModel tbmodel_parse_result,
+                     DefaultTableModel tbmodel_expanded_stack, DefaultTableModel tbmodel_addr_code){
         this.input_cache = input_cache;
+        this.table_cache = table_cache;
         this.tbmodel_parse_result = tbmodel_parse_result;
         this.tbmodel_parse_error = tbmodel_parse_error;
         this.status = new Stack<>();
         this.chars = new Stack<>();
         this.input = new Stack<>();
+        this.table = new Stack<>();
         this.analyseList = analyseList;
-        this.semantic = new Semantic(analyseList);
+        this.semantic = new Semantic(analyseList, tbmodel_expanded_stack, tbmodel_addr_code);
     }
 
     public void output(String t){
@@ -74,10 +77,11 @@ public class TextParse{
     public void Parsing(){
         status.push(0);
         input.push("$");
+        table.push(new Pair<>("$", "$"));
         for(int i = input_cache.size()-1, j = table_cache.size()-1;i >= 0;i--){
             String s = input_cache.get(i);
             input.push(s);
-            if(s.equals("number") || s.equals("id")){
+            if(s.equals("num") || s.equals("id")){
                 table.push(new Pair<>(s, table_cache.get(j--)));
             } else {
                 table.push(new Pair<>(s, s));
@@ -88,6 +92,7 @@ public class TextParse{
             String s = input.peek();
             if(s.equals("ENTER")){
                 input.pop();
+                table.pop();
                 row_number++;
                 continue;
             }
@@ -108,6 +113,7 @@ public class TextParse{
                 int tmpRow = row_number;
                 while (!input.isEmpty() && analyseList.actions.get(new Pair<>(status.peek(), input.peek())) == null) {
                     String tmp = input.pop();
+                    table.pop();
                     if (tmp.equals("ENTER")) {
                         row_number++;
                     }
@@ -120,16 +126,16 @@ public class TextParse{
                 continue;
             }
             if(res.getKey() == -1) {
-                //output("Accept");
+                output("Accept");
                 break;
             } else if(res.getKey() == 1){
-                //output("Shift");
+                output("Shift");
                 chars.push(input.pop());
                 status.push(res.getValue());
                 semantic.add(table.peek().getKey(), table.pop().getValue());
             } else{
                 Production pro = analyseList.productions.get(res.getValue());
-                //output("Reduce/"+pro.toString());
+                output("Reduce/"+pro.toString());
                 int l = pro.returnRights().length;
                 if(pro.returnRights()[0].equals("epsilon"))
                     l = 0;

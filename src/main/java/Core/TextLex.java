@@ -458,4 +458,8 @@ public class TextLex{
     public ArrayList<HashMap<String, String>> get_Lex_Error() {
         return lex_error_stack;
     }
+
+    public ArrayList<String> get_Lex_Table() {
+        return lex_table_stack;
+    }
 }

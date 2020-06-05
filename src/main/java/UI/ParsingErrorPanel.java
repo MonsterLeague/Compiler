@@ -1,7 +1,5 @@
 package UI;
 
-import UI.DemoScrollBarUI;
-
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
