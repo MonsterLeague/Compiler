@@ -27,6 +27,7 @@ public class TextLex{
     public TextLex(String text, DefaultTableModel tb_lex_result, DefaultTableModel tb_lex_error, DefaultTableModel tb_lex_table){
         lex_result_stack = new ArrayList<>();
         lex_error_stack = new ArrayList<>();
+        lex_table_stack = new ArrayList<>();
         this.originText = text;
         this.text = text.toLowerCase();
         this.tbmodel_lex_result = tb_lex_result;

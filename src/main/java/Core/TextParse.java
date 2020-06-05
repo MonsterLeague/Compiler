@@ -29,7 +29,7 @@ public class TextParse{
         this.chars = new Stack<>();
         this.input = new Stack<>();
         this.analyseList = analyseList;
-        this.semantic = new Semantic();
+        this.semantic = new Semantic(analyseList);
     }
 
     public void output(String t){

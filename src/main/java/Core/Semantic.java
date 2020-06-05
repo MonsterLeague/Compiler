@@ -5,12 +5,20 @@ import java.util.Stack;
 
 public class Semantic {
     private Stack<Symbol> symbols;
-    private ArrayList<String> table;
     private ArrayList<Code> codes;
     private AnalyseList analyseList;
     private int tempNumber;
 
-    public Semantic() { }
+    public Semantic() {
+        this.symbols = new Stack<>();
+        this.codes = new ArrayList<>();
+        tempNumber = 0;
+    }
+
+    public Semantic(AnalyseList analyseList){
+        this();
+        this.analyseList = analyseList;
+    }
 
     public String getTemp(){
         return "t"+(++tempNumber);
