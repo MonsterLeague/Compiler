@@ -79,9 +79,6 @@ public class TextParse{
             input.push(s);
             if(s.equals("number") || s.equals("id")){
                 table.push(new Pair<>(s, table_cache.get(j--)));
-            } else if(s.equals("compare")){
-                // TODO 这个标记意义不明
-
             } else {
                 table.push(new Pair<>(s, s));
             }

@@ -26,6 +26,7 @@ public class Semantic {
 
     public void analyse(int res, int l){
         String left = analyseList.productions.get(res).returnLeft();
+        ArrayList<Symbol> out = new ArrayList<>();
         if(res == 0){
             // factor -> id | number
             String tmp = symbols.peek().getSecond();
@@ -48,12 +49,12 @@ public class Semantic {
             symbols.push(new Symbol(left, "#", term));
             codes.add(new Code(op, term1, factor, term));
         } else if(res == 3){
-            // stmt -> id := expr
+            // init -> id := expr
             String expr = symbols.pop().getAddr();
             symbols.pop();
             String id = symbols.pop().getSecond();
             symbols.pop();
-            symbols.push(new Symbol(left, "#", "#"));
+            symbols.push(new Symbol(left, "#", id));
             codes.add(new Code("=", expr, "#", id));
         } else if(res == 4){
             // bool -> expr rel expr
@@ -131,47 +132,51 @@ public class Semantic {
             symbols.push(new Symbol(left, "#", "#"));
         }  else if(res == 11){
             // stmt -> while M bool do M stmt
-            int stmt1 = symbols.pop().getNextList();
+            int stmt = symbols.pop().getNextList();
             int M2 = symbols.pop().getInstr();
             symbols.pop();
             int trueList = symbols.peek().getTrueList();
             int falseList = symbols.pop().getFalseList();
             int M1 = symbols.pop().getInstr();
             symbols.pop();
-            if(stmt1 != -1)
-                codes.get(stmt1).setResult(String.valueOf(M1 + 100));
+            if(stmt != -1)
+                codes.get(stmt).setResult(String.valueOf(M1 + 100));
             codes.get(trueList).setResult(String.valueOf(M2 + 100));
             symbols.push(new Symbol(left, "#", "#", -1, -1, -1, falseList));
             codes.add(new Code("goto", "#", "#", String.valueOf(M1 + 100)));
-        } else if(res == 12){
-            // stmt -> repeat M stmts until bool
-            // TODO 我们没有这个文法
+        } else if(res == 13){
+            // stmt -> for M inc do M stmt
+            // stmt -> for M dec do M stmt
+            // TODO 需要测试翻译方案
+            int stmt = symbols.pop().getNextList();
+            int M2 = symbols.pop().getInstr();
+            symbols.pop();
+            String op = symbols.peek().getSecond();
             int trueList = symbols.peek().getTrueList();
             int falseList = symbols.pop().getFalseList();
+            int M1 = symbols.pop().getInstr();
+            String term = symbols.pop().getAddr();
             symbols.pop();
-            symbols.pop();
-            int M = symbols.pop().getInstr();
-            symbols.pop();
-            codes.get(falseList).setResult(String.valueOf(M + 100));
-            symbols.push(new Symbol(left, "#", "#", -1, -1, -1, trueList));
-        } else if(res == 13){
-            // stmt -> for id := expr to expr do stmt
-            // stmt -> for id := expr downto expr do stmt
-            // TODO 需要设计翻译方案
-            int stmt = symbols.pop().getNextList();
-            symbols.pop();
-            String expr2 = symbols.pop().getAddr();
-            String texOp = symbols.pop().getFirst();
-            String expr1 = symbols.pop().getAddr();
-            symbols.pop();
-            String id = symbols.pop().getSecond();
-            symbols.pop();
-            codes.add(new Code("=", expr1, "#", id));
-            int begin = codes.size();
-            String op = (texOp.equals("to") ? "<" : ">");
-            codes.add(new Code(op, expr1, expr2, String.valueOf(codes.size()+2)));
-            codes.add(new Code("goto", "#", "#", String.valueOf(stmt + 100)));
-
+            if(stmt != -1)
+                codes.get(stmt).setResult(String.valueOf(M1 + 101));
+            codes.get(trueList).setResult(String.valueOf(M2 + 100));
+            symbols.push(new Symbol(left, "#", "#", -1, -1, -1, falseList));
+            String temp = getTemp();
+            codes.add(new Code(op, term, "1", temp));
+            codes.add(new Code("=", temp, "#", term));
+            codes.add(new Code("goto", "#", "#", String.valueOf(M1 + 101)));
+        } else if(res == 14){
+            // inc -> init to expr
+            // dec -> init downto expr
+            String expr = symbols.pop().getAddr();
+            String op = (symbols.pop().getFirst().equals("to") ? "<=" : ">=");
+            String init = symbols.pop().getAddr();
+            symbols.push(new Symbol(left, (op.equals("<=") ? "+" : "-"), init, codes.size(), codes.size()+1));
+            codes.add(new Code(op, init, expr, "goto _"));
+            codes.add(new Code("goto", "#", "#", "goto _"));
+        } else if(res == 15){
+            // stmt -> init | compound_stmt |
+            symbols.peek().setFirst(left);
         } else {
             for(int i = 0;i < l;i++)
                 symbols.pop();
@@ -194,7 +199,7 @@ public class Semantic {
                         append(" ").append(x.getArg2()).append(";");
             } else if(x.getOp().equals("=")){
                 s.append(x.getResult()).append(" = ").append(x.getArg1()).append(";");
-            } else if(x.getOp().equals("<") || x.getOp().equals(">")){
+            } else if(x.getOp().equals("<") || x.getOp().equals(">") || x.getOp().equals("<=") || x.getOp().equals(">=")){
                 s.append("if ").
                         append(x.getArg1()).
                         append(" ").
