@@ -12,10 +12,10 @@ stmt -> while M bool do M stmt
 stmt -> epsilon
 if_stmt -> if bool then M stmt
 if_stmt -> if bool then M stmt N else M stmt
-for_stmt -> for M inc do M stmt M
-for_stmt -> for M dec do M stmt M
-inc -> init to expr
-dec -> init downto expr
+for_stmt -> for inc do M stmt M
+for_stmt -> for dec do M stmt M
+inc -> init to M expr
+dec -> init downto M expr
 bool ->  expr > expr
 bool -> expr < expr
 expr -> expr + expr

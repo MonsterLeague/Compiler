@@ -160,8 +160,8 @@ public class Semantic {
             symbols.push(new Symbol(left, "null", "null", -1, -1, -1, falseList));
             codes.add(new Code("goto", "null", "null", String.valueOf(M1 + 100)));
         } else if(res == 14 || res == 15){
-            // stmt -> for M inc do M stmt M
-            // stmt -> for M dec do M stmt M
+            // stmt -> for inc do M stmt M
+            // stmt -> for dec do M stmt M
             int M3 = symbols.pop().getInstr();
             int stmt = symbols.pop().getNextList();
             int M2 = symbols.pop().getInstr();
@@ -169,7 +169,7 @@ public class Semantic {
             String op = symbols.peek().getSecond();
             String term = symbols.peek().getAddr();
             int trueList = symbols.peek().getTrueList();
-            int falseList = symbols.pop().getFalseList();
+            int falseList = symbols.peek().getFalseList();
             int M1 = symbols.pop().getInstr();
             symbols.pop();
             if(stmt != -1)
@@ -179,14 +179,15 @@ public class Semantic {
             String temp = getTemp();
             codes.add(new Code(op, term, "1", temp));
             codes.add(new Code("=", temp, "null", term));
-            codes.add(new Code("goto", "null", "null", String.valueOf(M1 + 101)));
+            codes.add(new Code("goto", "null", "null", String.valueOf(M1 + 100)));
         } else if(res == 16 || res == 17){
-            // inc -> init to expr
-            // dec -> init downto expr
+            // inc -> init to M expr
+            // dec -> init downto M expr
             String expr = symbols.pop().getAddr();
+            int M = symbols.pop().getInstr();
             String op = (symbols.pop().getFirst().equals("to") ? "<=" : ">=");
             String init = symbols.pop().getAddr();
-            symbols.push(new Symbol(left, (op.equals("<=") ? "+" : "-"), init, codes.size(), codes.size()+1));
+            symbols.push(new Symbol(left, (op.equals("<=") ? "+" : "-"), init, codes.size(), codes.size()+1, M));
             codes.add(new Code(op, init, expr, "goto _"));
             codes.add(new Code("goto", "null", "null", "goto _"));
         } else if(res == 5 || (res >= 7 && res <= 9)){

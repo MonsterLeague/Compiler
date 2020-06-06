@@ -380,7 +380,7 @@ public class AnalyseList{
                 ambiguity(i, I, S, R, s);
             }
             ambiguity(i, I, S, R, "$");
-            if(i == 65){
+            if(i == 68){
                 actions.put(new Pair<>(i, "else"), new Pair<>(0, 30));
             }
         }
