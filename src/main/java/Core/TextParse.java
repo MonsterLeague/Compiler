@@ -69,7 +69,7 @@ public class TextParse{
             input.push(tmpS.pop());
         }
         out = out + "动作:" + t;
-        System.out.println(out);
+        //System.out.println(out);
         tbmodel_parse_result.addRow(new String[]{s1, s2, s3, t});
     }
 

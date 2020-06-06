@@ -32,6 +32,9 @@ public class Semantic {
 
     public void add(String first, String second){
         symbols.push(new Symbol(first, second, "null"));
+        Symbol t = symbols.peek();
+        tbmodel_expanded_stack.addRow(new String[]{t.getFirst(), t.getSecond(), t.getAddr(),
+                printList(t.getTrueList()), printList(t.getFalseList()), printList(t.getNextList())});
     }
 
     public void pop(){
@@ -215,15 +218,15 @@ public class Semantic {
             StringBuilder s = new StringBuilder();
             Code x = codes.get(i);
             int addr = i+100;
-            if(x.getOp().equals("+") || x.getOp().equals("-") || x.getOp().equals("*") || x.getOp().equals("/")){
+            if(x.getOp().equals("+") || x.getOp().equals("-") || x.getOp().equals("*") || x.getOp().equals("/") || x.getOp().equals("^")){
                 s.append(x.getResult()).
                         append(" = ").
                         append(x.getArg1()).
                         append(" ").
                         append(x.getOp()).
-                        append(" ").append(x.getArg2()).append(";");
+                        append(" ").append(x.getArg2());
             } else if(x.getOp().equals("=")){
-                s.append(x.getResult()).append(" = ").append(x.getArg1()).append(";");
+                s.append(x.getResult()).append(" = ").append(x.getArg1());
             } else if(x.getOp().equals("<") || x.getOp().equals(">") || x.getOp().equals("<=") || x.getOp().equals(">=")){
                 s.append("if ").
                         append(x.getArg1()).
@@ -231,16 +234,16 @@ public class Semantic {
                         append(x.getOp()).
                         append(" ").
                         append(x.getArg2()).
-                        append(" goto ").append(x.getResult()).append(";");
+                        append(" goto ").append(x.getResult());
              }else if(x.getOp().equals("goto")){
-                s.append("goto ").append(x.getResult()).append(";");
+                s.append("goto ").append(x.getResult());
             }else
                 continue;
-            System.out.println(String.valueOf(addr)+": "+s);
+            //System.out.println(String.valueOf(addr)+": "+s);
             tbmodel_addr_code.addRow(new String[]{addr+": ", String.valueOf(s)});
         }
-        tbmodel_addr_code.addRow(new String[]{(codes.size()+100)+":", " "});
-        System.out.println(codes.size()+100+": ");
+        tbmodel_addr_code.addRow(new String[]{(codes.size()+100)+": ", " "});
+        //System.out.println(codes.size()+100+": ");
     }
 
     public int size() {

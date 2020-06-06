@@ -1,0 +1,126 @@
+(00) S' -> S
+
+(01) S -> program id ; compound_stmt .
+
+(02) compound_stmt -> begin stmts end
+
+(03) stmts -> stmt M
+{ backpatch(stmt.nextlist, M.instr); }
+
+(04) stmts -> stmts ; M1 stmt M2
+{ backpatch(stmts.nextlist, M1.instr); 
+  backpatch(stmt.nextlist, M2.instr); }
+
+(05) stmt -> init
+
+(06) init -> id := expr
+{ gen(top.get(id.lexeme) '=' expr.addr); } 
+
+(07) stmt -> compound_stmt
+
+(08) stmt -> if_stmt
+{ stmt.nextlist = if_stmt.nextlist; }
+
+(09) stmt -> for_stmt
+{ stmt.nextlist = for_stmt.nextlist; }
+
+(10) stmt -> while M1 bool do M2 stmt1
+{ backpatch(stmt1.nextlist, M1.instr);
+  backpatch(bool.truelist, M2.instr);
+  stmt.nextlist = bool.falselist;
+  gen('goto' M1.instr); }
+
+(11) stmt -> epsilon
+
+(12) if_stmt -> if bool then M stmt 
+{ backpatch(bool.truelist, M.instr);
+  if_stmt.nextlist = merge(bool.falselist, stmt.nextlist); }
+
+(13) if_stmt -> if bool then M1 stmt1 N else M2 stmt2
+{ backpatch(bool.truelist, M1.instr);
+  backpatch(bool.falselist, M2.instr);
+  temp = merge(stmt1.nextlist, N.nextlist);
+  if_stmt.nextlist = merge(temp, stmt2.nextlist); }
+
+(14) for_stmt -> for M1 inc do M2 stmt M3
+{ backpatch(stmt.nextlist, M3.instr);
+  backpatch(inc.truelist, M2.instr);
+  for_stmt.nextlist = inc.falselist;
+  temp = new Temp();
+  gen(temp '=' top.get(id.lexeme) '+1');
+  gen(top.get(id.lexeme) '=' temp);
+  gen('goto ' inc.instr); }
+
+(15) for_stmt -> for M1 dec do M2 stmt M3
+{ backpatch(stmt.nextlist, M3.instr);
+  backpatch(dec.truelist, M2.instr);
+  for_stmt.nextlist = dec.falselist;
+  temp = new Temp();
+  gen(temp '=' top.get(id.lexeme) '-1');
+  gen(top.get(id.lexeme) '=' temp);
+  gen('goto ' dec.instr); }
+
+(16) inc -> init to M expr
+{ inc.truelist = makelist(M.instr);
+  inc.falselist = makelist(M.instr + 1);
+  inc.instr = M.instr;
+  gen('if' top.get(id.lexeme) '<=' expr.addr 'goto _');
+  gen('goto _'); }
+
+(17) dec -> init downto M expr
+{ dec.truelist = makelist(M.instr);
+  dec.falselist = makelist(M.instr + 1);
+  dec.instr = M.instr;
+  gen('if' top.get(id.lexeme) '>=' expr.addr 'goto _');
+  gen('goto _'); }
+
+(18) bool ->  expr1 > expr2
+{ bool.truelist = makelist(nextinstr);
+  bool.falselist = makelist(nextinstr + 1);
+  gen('if' expr1.addr '>' expr2.addr 'goto _');
+  gen('goto _'); }
+
+(19) bool -> expr1 < expr2
+{ bool.truelist = makelist(nextinstr);
+  bool.falselist = makelist(nextinstr + 1);
+  gen('if' expr1.addr '<' expr2.addr 'goto _');
+  gen('goto _'); }
+
+(20) expr -> expr1 + expr2
+{ expr.addr = new Temp();
+  gen(expr.addr '=' expr1.addr '+' expr2.addr); }
+
+(21) expr -> expr - expr
+{ expr.addr = new Temp();
+  gen(expr.addr '=' expr1.addr '-' expr2.addr); }
+
+(22) expr -> expr * expr
+{ expr.addr = new Temp();
+  gen(expr.addr '=' expr1.addr '*' expr2.addr); }
+
+(23) expr -> expr / expr
+{ expr.addr = new Temp();
+  gen(expr.addr '=' expr1.addr '/' expr2.addr); }
+
+(24) expr -> expr ^ factor
+{ expr.addr = new Temp();
+  gen(expr.addr '=' expr1.addr '^' expr2.addr); }
+
+(25) expr -> factor
+{ expr.addr = factor.addr; }
+
+(26) factor -> id
+{ factor.addr = top.get(id.lexeme); }
+
+(27) factor -> num
+{ factor.addr = top.get(num.lexeme); }
+
+(28) factor -> ( expr )
+{ factor.addr = expr.addr; }
+
+(29) M -> epsilon
+{ M.instr = nextinstr; }
+
+(30) N -> epsilon
+{ N.nextlist = makelist(nextinstr);
+  gen('goto _'); }

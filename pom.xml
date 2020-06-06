@@ -34,7 +34,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>Parser</mainClass> <!-- 此处为主入口-->
+                            <mainClass>Compiler</mainClass> <!-- 此处为主入口-->
                         </manifest>
                     </archive>
                 </configuration>

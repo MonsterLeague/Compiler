@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -26,7 +27,6 @@ public class SemanticResultPanel extends JPanel {
         //addrCodeTable.setEnabled(false);
         addrCodeScrollPane = new JScrollPane(addrCodeTable);
         addrCodeDTCR = new DefaultTableCellRenderer();
-        addrCodeDTCR.setHorizontalAlignment(JLabel.CENTER);
         addrCodeTable.setDefaultRenderer(Object.class, addrCodeDTCR);
         addrCodeTable.getTableHeader().setResizingAllowed(false);
 
@@ -48,14 +48,21 @@ public class SemanticResultPanel extends JPanel {
                 }
             }
         });
+
+        TableColumn col = addrCodeTable.getColumnModel().getColumn(0);
+        DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+        render.setHorizontalAlignment(SwingConstants.CENTER);
+        render.setBackground(new Color(43, 43, 43));
+        render.setForeground(Color.WHITE);
+        col.setCellRenderer(render);
     }
 
     void initLayout() {
         setLayout(null);
         add(addrCodeTabbedPane);
-        addrCodeTabbedPane.setUI(new DemoTabbedPaneUI(485, 10));
+        addrCodeTabbedPane.setUI(new DemoTabbedPaneUI(253, 10));
         addrCodeTabbedPane.addTab("三地址码", addrCodeScrollPane);
-        addrCodeTabbedPane.setBounds(0, 0, 585, 580);
+        addrCodeTabbedPane.setBounds(117, 0, 351, 580);
         addrCodeTabbedPane.setForeground(Color.WHITE);
         addrCodeTabbedPane.setFont(new Font("微软雅黑", Font.PLAIN, 15));
 
@@ -83,6 +90,12 @@ public class SemanticResultPanel extends JPanel {
         }
         addrCodeDTCR.setBackground(new Color(43, 43, 43));
         addrCodeDTCR.setForeground(Color.WHITE);
+        TableColumn col = addrCodeTable.getColumnModel().getColumn(0);
+        DefaultTableCellRenderer render = new DefaultTableCellRenderer();
+        render.setHorizontalAlignment(SwingConstants.CENTER);
+        render.setBackground(new Color(43, 43, 43));
+        render.setForeground(Color.WHITE);
+        col.setCellRenderer(render);
     }
 
     private JTable addrCodeTable;
