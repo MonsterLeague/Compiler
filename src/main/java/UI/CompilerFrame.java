@@ -9,11 +9,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
+import java.util.Vector;
 
-public class CompilerFrame extends JFrame implements ActionListener {
+public class CompilerFrame extends JFrame implements ActionListener  {
 
     public CompilerFrame() {
         // 设置标题
@@ -225,6 +224,16 @@ public class CompilerFrame extends JFrame implements ActionListener {
                             errorTabbedPane.getParsingErrorDTM(), resultTabbedPane.getParsingDTM(),
                             new DefaultTableModel(), new DefaultTableModel());
                     textParse.Parsing();
+                    Vector parsingError = errorTabbedPane.getParsingErrorDTM().getDataVector();
+                    try {
+                        PrintWriter pw = new PrintWriter(new File("ERROR.txt"));
+                        for (int i = 0; i < parsingError.size(); i++) {
+                            pw.println(parsingError.get(i));
+                        }
+                        pw.close();
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
@@ -239,7 +248,7 @@ public class CompilerFrame extends JFrame implements ActionListener {
                 TextLex lex = new TextLex(editCodeArea.getText(), resultTabbedPane.getLexingResultDTM(),
                         errorTabbedPane.getLexingErrorDTM(), resultTabbedPane.getSymbolDTM());
                 lex.scannerAll();
-                // 语法分析
+                // 语法制导翻译
                 if (lex.get_Lex_Error().size() != 0) {
                     JOptionPane.showMessageDialog(mainPanel, "词法分析阶段出现错误！", "提示", JOptionPane.ERROR_MESSAGE);
                 }
@@ -248,6 +257,22 @@ public class CompilerFrame extends JFrame implements ActionListener {
                             errorTabbedPane.getParsingErrorDTM(), resultTabbedPane.getParsingDTM(),
                             expandedStackPanel.expandedStackDTM, resultTabbedPane.getSemanticDTM());
                     parse.Parsing();
+                    Vector parsingError = errorTabbedPane.getParsingErrorDTM().getDataVector();
+                    Vector threeAddrCode = resultTabbedPane.getSemanticDTM().getDataVector();
+                    try {
+                        PrintWriter pw = new PrintWriter(new File("ERROR.txt"));
+                        for (int i = 0; i < parsingError.size(); i++) {
+                            pw.println(parsingError.get(i));
+                        }
+                        pw.close();
+                        pw = new PrintWriter(new File("ThreeAddressCode.txt"));
+                        for (int i = 0; i < threeAddrCode.size(); i++) {
+                            pw.println(threeAddrCode.get(i));
+                        }
+                        pw.close();
+                    } catch (FileNotFoundException ex) {
+                        ex.printStackTrace();
+                    }
                 }
             }
         }
