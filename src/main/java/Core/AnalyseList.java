@@ -360,18 +360,20 @@ public class AnalyseList{
                                 break;
                             }
                         }
-                        for(String s : follows.get(it.returnLeft())){		//遍历归约规则m的follow集
+                        for(String s : follows.get(it.returnLeft())){		// 遍历归约规则m的follow集
+                            if(R.get(s) != null){                           // 唯一一处规约/规约冲突，直接特判
+                                for(m = 0;m < productions.size()
+                                        && !productions.get(m).left.equals("N");m++);
+                            }
                             R.put(s, m);
-                            //actions.put(new Pair<>(i, s), new Pair<>(0, m));//0表示规约
                         }
-                    }else													//如果 点 在开始符号S的右边
-                        actions.put(new Pair<>(i, "$"), new Pair<>(-1, -1));//-1表示接受
-                }else{														//如果 点 右边存在字符X
+                    }else													// 如果 点 在开始符号S的右边
+                        actions.put(new Pair<>(i, "$"), new Pair<>(-1, -1));// -1表示接受
+                }else{														// 如果 点 右边存在字符X
                     String X = it.returnRights()[it.getCurl()];
-                    if(terminals.contains(X)){								//如果X是终结符
+                    if(terminals.contains(X)){								// 如果X是终结符
                         S.put(X, tgoto.get(new Pair<>(i, X)));
-                        //actions.put(t, new Pair<>(1, tgoto.get(t)));		//1表示移进
-                    }else{													//如果X是非终结符
+                    }else{													// 如果X是非终结符
                         gotos.put(new Pair<>(i, X), tgoto.get(new Pair<>(i, X)));
                     }
                 }
@@ -380,30 +382,25 @@ public class AnalyseList{
                 ambiguity(i, I, S, R, s);
             }
             ambiguity(i, I, S, R, "$");
-            if(i == 68){
+            /*
+            if(gotos.get(new Pair<>(i, "N")) != null){
                 actions.put(new Pair<>(i, "else"), new Pair<>(0, 30));
             }
+            */
         }
         outputSVC();
     }
-
-	/*
-program test;
-begin
-y:=y+y^5-1
-end.
-	 */
 
     public void ambiguity(int i, Set<Item> I, Map<String, Integer> S, Map<String, Integer> R, String s){
         if(R.get(s) == null && S.get(s) == null)
             return;
         if(R.get(s) == null){
-            actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));
+            actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));         // 1-Shift
         }else if(S.get(s) == null){
-            actions.put(new Pair<>(i, s), new Pair<>(0, R.get(s)));
+            actions.put(new Pair<>(i, s), new Pair<>(0, R.get(s)));         // 0-Reduce
         }else{
             if(s.equals("else"))
-                actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));
+                actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));     // 1-Shift
             else if(operator.get(s) != null){
                 String t = null;
                 for(Item it:I){
@@ -415,11 +412,11 @@ end.
                 if(t == null) return;
                 if(operator.get(s) <= operator.get(t)){
                     if(t.equals(":="))
-                        actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));
+                        actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s))); // 1-Shift
                     else
-                        actions.put(new Pair<>(i, s), new Pair<>(0, R.get(s)));
+                        actions.put(new Pair<>(i, s), new Pair<>(0, R.get(s))); // 0-Reduce
                 }else
-                    actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));
+                    actions.put(new Pair<>(i, s), new Pair<>(1, S.get(s)));     // 1-Shift
             }
         }
     }
