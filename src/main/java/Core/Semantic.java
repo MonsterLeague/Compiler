@@ -138,10 +138,10 @@ public class Semantic {
             int stmt = symbols.pop().getNextList();
             symbols.push(new Symbol(left, "null", "null", -1, -1, -1, stmt));
         } else if(res == 4){
-            // stmts -> stmts ; M stmt
+            // stmts -> stmts M ; stmt
             int stmt = symbols.pop().getNextList();
-            int M = symbols.pop().getInstr();
             symbols.pop();
+            int M = symbols.pop().getInstr();
             int stmts = symbols.pop().getNextList();
             if(stmts != -1)
                 codes.get(stmts).setResult(String.valueOf(M + 100));

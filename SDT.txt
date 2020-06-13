@@ -8,7 +8,7 @@
 (03) stmts -> stmt
 { stmts.nextlist = stmt.nextlist; }
 
-(04) stmts -> stmts1 ; M stmt
+(04) stmts -> stmts1 M ; stmt
 { backpatch(stmts1.nextlist, M.instr);
   stmts.nextlist = stmt.nextlist ; }
 

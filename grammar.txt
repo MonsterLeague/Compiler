@@ -2,7 +2,7 @@ S' -> S
 S -> program id ; compound_stmt .
 compound_stmt -> begin stmts M end
 stmts -> stmt
-stmts -> stmts ; M stmt
+stmts -> stmts M ; stmt
 stmt -> init
 init -> id := expr
 stmt -> compound_stmt
