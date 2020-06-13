@@ -126,25 +126,26 @@ public class Semantic {
             } else {
                 symbols.push(new Symbol(left, "null", "null", -1, -1, -1, N));
             }
-        } else if(res == 3){
-            // stmts -> stmt M
+        } else if (res == 2) {
+            // compound_stmt -> begin stmts M end
+            symbols.pop();
             int M = symbols.pop().getInstr();
+            int stmts = symbols.pop().getNextList();
+            if(stmts != -1)
+                codes.get(stmts).setResult(String.valueOf(M + 100));
+        } else if(res == 3){
+            // stmts -> stmt
             int stmt = symbols.pop().getNextList();
-            if(stmt != -1)
-                codes.get(stmt).setResult(String.valueOf(M+100));
-            symbols.push(new Symbol(left, "null", "null"));
+            symbols.push(new Symbol(left, "null", "null", -1, -1, -1, stmt));
         } else if(res == 4){
-            // stmts -> stmts ; M stmt M
-            int M2 = symbols.pop().getInstr();
+            // stmts -> stmts ; M stmt
             int stmt = symbols.pop().getNextList();
-            if(stmt != -1)
-                codes.get(stmt).setResult(String.valueOf(M2 + 100));
-            int M1 = symbols.pop().getInstr();
+            int M = symbols.pop().getInstr();
             symbols.pop();
             int stmts = symbols.pop().getNextList();
             if(stmts != -1)
-                codes.get(stmts).setResult(String.valueOf(M1 + 100));
-            symbols.push(new Symbol(left, "null", "null"));
+                codes.get(stmts).setResult(String.valueOf(M + 100));
+            symbols.push(new Symbol(left, "null", "null", -1, -1, stmt));
         }  else if(res == 10){
             // stmt -> while M bool do M stmt
             int stmt = symbols.pop().getNextList();

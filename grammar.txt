@@ -1,8 +1,8 @@
 S' -> S
 S -> program id ; compound_stmt .
-compound_stmt -> begin stmts end
-stmts -> stmt M
-stmts -> stmts ; M stmt M
+compound_stmt -> begin stmts M end
+stmts -> stmt
+stmts -> stmts ; M stmt
 stmt -> init
 init -> id := expr
 stmt -> compound_stmt

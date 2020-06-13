@@ -2,14 +2,15 @@
 
 (01) S -> program id ; compound_stmt .
 
-(02) compound_stmt -> begin stmts end
+(02) compound_stmt -> begin stmts M end
+{ backpatch(stmts.nextlist, M.instr); }
 
-(03) stmts -> stmt M
-{ backpatch(stmt.nextlist, M.instr); }
+(03) stmts -> stmt
+{ stmts.nextlist = stmt.nextlist; }
 
-(04) stmts -> stmts ; M1 stmt M2
-{ backpatch(stmts.nextlist, M1.instr); 
-  backpatch(stmt.nextlist, M2.instr); }
+(04) stmts -> stmts1 ; M stmt
+{ backpatch(stmts1.nextlist, M.instr);
+  stmts.nextlist = stmt.nextlist ; }
 
 (05) stmt -> init
 

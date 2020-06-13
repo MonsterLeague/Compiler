@@ -1,1 +1,2 @@
-[6, Undefined Reducible Rule. Last token "if". Delete "id := id "]
+[3, Undefined Reducible Rule. Last token ";". Delete " ;"]
+[4, Undefined Reducible Rule. Last token "for". Delete " for id := num downto num do if id < id + num then id := id else id := id * num + id"]
