@@ -131,12 +131,13 @@ public class Semantic {
             symbols.pop();
             int M = symbols.pop().getInstr();
             int stmts = symbols.pop().getNextList();
+            symbols.pop();
             if(stmts != -1)
                 codes.get(stmts).setResult(String.valueOf(M + 100));
+            symbols.push(new Symbol(left, "null", "null"));
         } else if(res == 3){
             // stmts -> stmt
-            int stmt = symbols.pop().getNextList();
-            symbols.push(new Symbol(left, "null", "null", -1, -1, -1, stmt));
+            symbols.peek().setFirst(left);
         } else if(res == 4){
             // stmts -> stmts M ; stmt
             int stmt = symbols.pop().getNextList();
@@ -145,7 +146,7 @@ public class Semantic {
             int stmts = symbols.pop().getNextList();
             if(stmts != -1)
                 codes.get(stmts).setResult(String.valueOf(M + 100));
-            symbols.push(new Symbol(left, "null", "null", -1, -1, stmt));
+            symbols.push(new Symbol(left, "null", "null", -1, -1, -1, stmt));
         }  else if(res == 10){
             // stmt -> while M bool do M stmt
             int stmt = symbols.pop().getNextList();

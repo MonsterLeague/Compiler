@@ -24,11 +24,11 @@ public class AnalyseList{
         operator.put(":=", 0);
         operator.put("<", 1);
         operator.put(">", 1);
-        operator.put("^", 2);
         operator.put("+", 3);
         operator.put("-", 3);
         operator.put("*", 4);
         operator.put("/", 4);
+        operator.put("^", 5); // 原文法中^为幂运算，优先级最高
     }
 
     public AnalyseList(){
