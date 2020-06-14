@@ -43,18 +43,18 @@
   temp = merge(stmt1.nextlist, N.nextlist);
   if_stmt.nextlist = merge(temp, stmt2.nextlist); }
 
-(14) for_stmt -> for M1 inc do M2 stmt M3
-{ backpatch(stmt.nextlist, M3.instr);
-  backpatch(inc.truelist, M2.instr);
+(14) for_stmt -> for inc do M1 stmt M2
+{ backpatch(stmt.nextlist, M2.instr);
+  backpatch(inc.truelist, M1.instr);
   for_stmt.nextlist = inc.falselist;
   temp = new Temp();
   gen(temp '=' top.get(id.lexeme) '+1');
   gen(top.get(id.lexeme) '=' temp);
   gen('goto ' inc.instr); }
 
-(15) for_stmt -> for M1 dec do M2 stmt M3
-{ backpatch(stmt.nextlist, M3.instr);
-  backpatch(dec.truelist, M2.instr);
+(15) for_stmt -> for dec do M1 stmt M2
+{ backpatch(stmt.nextlist, M2.instr);
+  backpatch(dec.truelist, M1.instr);
   for_stmt.nextlist = dec.falselist;
   temp = new Temp();
   gen(temp '=' top.get(id.lexeme) '-1');

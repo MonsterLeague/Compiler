@@ -1,0 +1,1 @@
+[4, Undefined Reducible Rule. Last token "repeat". Delete ";  repeat id := id / num - num until id < id + id ^ num * num"]
