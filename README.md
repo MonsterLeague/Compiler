@@ -1,4 +1,4 @@
-# Compile
+# Compiler
 FZU Compiling Principle
 
 ## 简介：
